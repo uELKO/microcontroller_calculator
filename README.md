@@ -9,4 +9,4 @@ Aufgabenstellung 2: Mikrocontroller-Implementierung eines einfachen Kalkulators
 ## Aufbau
 ArduinoSerialCalc: VSCode-Projekt für Arduino Firmware
 
-WinRemoteCalc: VSCode-Projekt für Kommandozeileneingabe über serielle Schnittstelle (C-Programm)
+WinRemoteCalc: VSCode-Projekt für Kommunikation über serielle Schnittstelle (C-Programm, CLI)
