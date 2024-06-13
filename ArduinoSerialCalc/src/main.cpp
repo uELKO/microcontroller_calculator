@@ -38,7 +38,7 @@ double math_divide(int16_t x, int16_t y)
 }
 
 // calculate x to the power of y and return result
-double math_power(int16_t x, int16_t y)
+int32_t math_power(int16_t x, int16_t y)
 {
     return pow(x, y);
 }
@@ -93,7 +93,7 @@ void processData(String data)
 
         case 'p':
             result_d = math_power(tempX, tempY);
-            result_int = false;
+            result_int = true;
             break;
 
         default:
