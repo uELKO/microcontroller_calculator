@@ -14,33 +14,33 @@ void setup()
 }
 
 // add numbers x & y and return result
-int32_t math_add(int16_t x, int16_t y)
+int32_t math_add(int32_t x, int32_t y)
 {
     return x + y;
 }
 
 // substract number y from x and return result
-int32_t math_subtract(int16_t x, int16_t y)
+int32_t math_subtract(int32_t x, int32_t y)
 {
     return x - y;
 }
 
 // multiply numbers x & y and return result
-int32_t math_multiply(int16_t x, int16_t y)
+int32_t math_multiply(int32_t x, int32_t y)
 {
     return x * y;
 }
 
 // divide number x by y and return result
-double math_divide(int16_t x, int16_t y)
+double math_divide(int32_t x, int32_t y)
 {
-    return x / y;
+    return (x * 1.0) / y;
 }
 
 // calculate x to the power of y and return result
-int32_t math_power(int16_t x, int16_t y)
+int32_t math_power(int32_t x, int32_t y)
 {
-    return pow(x, y);
+    return round(pow(x, y));
 }
 
 // process complete input string and send result
@@ -82,8 +82,8 @@ void processData(String data)
             break;
 
         case 'm':
-            result_d = math_multiply(tempX, tempY);
-            result_int = false;
+            result_i = math_multiply(tempX, tempY);
+            result_int = true;
             break;
 
         case 'd':
@@ -92,7 +92,7 @@ void processData(String data)
             break;
 
         case 'p':
-            result_d = math_power(tempX, tempY);
+            result_i = math_power(tempX, tempY);
             result_int = true;
             break;
 
@@ -108,7 +108,7 @@ void processData(String data)
         }
         else
         {
-            Serial.println(result_d);
+            Serial.println(result_d, 4);
         }
     }
     else
@@ -121,7 +121,7 @@ void loop()
 {
     // while serial buffer has data
     while (Serial.available())
-    {   
+    {
         // store byte in character
         char receivedChar = (char)Serial.read();
 

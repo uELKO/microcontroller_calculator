@@ -4,11 +4,19 @@
 #include <string.h>
 #include <windows.h>
 
-void listSerialPorts(UINT16 length)
+/**
+ * @brief Lists all available serial (COM) ports on the computer.
+ *
+ * This function prints all available serial ports of the computer.
+ * @param
+ * UINT8 len: scan from port 0 to port <len>
+ * @return void
+ */
+void listSerialPorts(UINT8 len)
 {
     char portName[10];
     printf("Available serial ports:\n");
-    for (UINT16 i = 0; i <= length; ++i)
+    for (UINT8 i = 0; i <= len; ++i)
     {
         snprintf(portName, sizeof(portName), "COM%d", i);
         HANDLE hCom = CreateFile(portName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
@@ -20,6 +28,18 @@ void listSerialPorts(UINT16 length)
     }
 }
 
+/**
+ * @brief Opens serial port.
+ *
+ * This function opens a serial port with following input syntax: COM<0-255>
+ * and sets port properties:
+ * Baudrate: 115200 |
+ * Byte size: 8 |
+ * Stop bit: 1 |
+ * Parity: no
+ *
+ * @return HANDLE (Windows API)
+ */
 HANDLE openSerialPort(const char *portName)
 {
     HANDLE hCom = CreateFile(portName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
@@ -70,7 +90,14 @@ HANDLE openSerialPort(const char *portName)
     return hCom;
 }
 
-// Funktion zum Senden von Daten über die serielle Schnittstelle
+/**
+ * @brief Sends data via the given serial interface.
+ * Prints message when write error to device occurs.
+ * @param
+ * hCom: serial interface |
+ * const char *data: pointer to string
+ * @return void
+ */
 void sendSerialData(HANDLE hCom, const char *data)
 {
     DWORD bytes_written;
@@ -84,7 +111,13 @@ void sendSerialData(HANDLE hCom, const char *data)
     }
 }
 
-// Funktion zum Empfangen von Daten über die serielle Schnittstelle
+/**
+ * @brief Receives data via the given serial interface.
+ * Prints message when read error from device occurs.
+ * @param
+ * hCom: serial interface
+ * @return char* buf: pointer to string
+ */
 char* receiveSerialData(HANDLE hCom)
 {
     static char buf[100];
@@ -93,8 +126,8 @@ char* receiveSerialData(HANDLE hCom)
     BOOL result = ReadFile(hCom, buf, sizeof(buf) - 1, &bytes_read, NULL);
     if (result && bytes_read > 0)
     {
-        buf[bytes_read] = '\0'; //String Null-Terminierung
-        //printf("Result: %s", buf);
+        buf[bytes_read] = '\0'; // String Null-Terminierung
+        // printf("Result: %s", buf);
     }
     else if (!result)
     {
@@ -108,11 +141,15 @@ char* receiveSerialData(HANDLE hCom)
     return buf;
 }
 
-// Funktion zum Abfragen einer Ja/Nein-Eingabe
-char* getInputChar()
+/**
+ * @brief Determines if the user wants to exit the program.
+ * This function prompts the user to enter 'y' or 'n' to decide whether to exit the program.
+ * @return char Returns 'y' if the user wants to exit, 'n' otherwise.
+ */
+char getInputChar()
 {
     getchar();
-    static char input; //static: auch nach Funktionsaufruf noch verfügbar
+    static char input; // static: auch nach Funktionsaufruf noch verfügbar
     while (1)
     {
         printf(">Would you like to exit the program? (y/n): ");
@@ -134,6 +171,42 @@ char* getInputChar()
     }
 }
 
+int split_string(const char *input_buf, int *number_1, int *number_2, char *operator) {
+    const char *operators_1 = "+-*/^";
+    const char *operators = "asmdp";
+    const char *ptr = input_buf;
+
+    // Durchlaufe den String und finde den Operator
+    while (*ptr) {
+        const char *op_ptr = strchr(operators_1, *ptr);
+        if (op_ptr) {
+            int index = op_ptr - operators_1; // Index des Operators in operators_1
+            *operator = operators[index]; // Entsprechender Operator aus operators
+            break;
+        }
+        ptr++;
+    }
+
+    if (*operator == '\0') {
+        // Kein gültiger Operator gefunden
+        return 0;
+    }
+
+    // Extrahiere die Zahlen vor und nach dem Operator
+    char left_part[100] = {0};
+    char right_part[100] = {0};
+    strncpy(left_part, input_buf, ptr - input_buf);
+    strcpy(right_part, ptr + 1);
+
+    // Entferne führende und nachfolgende Leerzeichen
+    *number_1 = atoi(left_part);
+    *number_2 = atoi(right_part);
+
+    return 1;
+}
+
+/// @brief
+/// @return
 int main()
 {
     printf("#####################################\n");
@@ -142,10 +215,11 @@ int main()
 
     printf("\n--- Initiate Serial Connection ---\n");
 
-    listSerialPorts(256);
+    listSerialPorts(254);
 
     printf(">Select the serial port to be opened (enter the full name, e.g. COM3): ");
 
+    // get serial input
     char portName[7];
     scanf("%6s", portName);
 
@@ -155,51 +229,82 @@ int main()
     {
         printf("Serial port %s opened.\n", portName);
     }
+
+    // stay in loop (recurring calculation)
     while (1)
     {
         printf("\n--- Remote Calculator ---\n");
 
-        int x, y;
-        char c;
+        // int x, y;
+        // char c;
 
-        printf(">Enter first number (int): ");
-        if (scanf("%d", &x) != 1)
+        // printf(">Enter first number (int): ");
+        // if (scanf("%d", &x) != 1)
+        // {
+        //     fprintf(stderr, "Invalid input.\n");
+        //     return 0;
+        // }
+
+        // printf(">Enter second number (int): ");
+        // if (scanf("%d", &y) != 1)
+        // {
+        //     fprintf(stderr, "Invalid input.\n");
+        //     return 0;
+        // }
+
+        // printf(">Enter operand: add (a)/ substract (s)/ multiply (m)/ divide (d)/ power (p): ");
+        // scanf(" %c", &c);
+
+        // ###################################################
+
+        char input_buf[100];
+
+        printf(">Enter calculation: ");
+        scanf(" %s", &input_buf);
+
+        int number_1, number_2;
+        char operator= '\0';
+
+        if (split_string(input_buf, &number_1, &number_2, &operator))
         {
-            fprintf(stderr, "Invalid input.\n");
-            return 0;
+            printf("Number 1: %d\n", number_1);
+            printf("Number 2: %d\n", number_2);
+            printf("Operator: %c\n", operator);
+        }
+        else
+        {
+            printf("No valid operator found in the string.\n");
         }
 
-        printf(">Enter second number (int): ");
-        if (scanf("%d", &y) != 1)
-        {
-            fprintf(stderr, "Invalid input.\n");
-            return 0;
-        }
-
-        printf(">Enter operand: add (a)/ substract (s)/ multiply (m)/ divide (d)/ power (p): ");
-        scanf(" %c", &c);
-
+        /**
+         * send string over serial interface. Syntax:
+         * <number_1>;<number_2>;<calculation>;
+         */
         char data[100];
-        snprintf(data, sizeof(data), "%d;%d;%c;\n", x, y, c);
+        snprintf(data, sizeof(data), "%d;%d;%c;\n", number_1, number_2, operator);
+        //snprintf(data, sizeof(data), "%d;%d;%c;\n", x, y, c);
         sendSerialData(hCom, data);
 
         printf("------------\n");
 
-        char input = *receiveSerialData(hCom);
-        if (input != NULL) {
-            printf("Result: %s", input);
+        char *returned_str = receiveSerialData(hCom);
+        if (returned_str != NULL)
+        {
+            printf("Result: %s", returned_str);
         }
 
         printf("--------------------------------\n");
 
-        // Warten auf Benutzeraktion
+        /**
+         * wait for user input
+         * y: close serial port and close terminal
+         * n: start new calculation
+         */
         while (1)
         {
-            // Fragen, ob das Programm beendet werden soll
-            char response = *getInputChar();
+            char response = getInputChar();
             if (response == 'y')
             {
-                // Seriellen Port schließen
                 CloseHandle(hCom);
                 printf("Serial port closed.\n");
                 printf("\n--- Program End ---\n");
