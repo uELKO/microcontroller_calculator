@@ -4,6 +4,9 @@
 #include <string.h>
 #include <windows.h>
 
+// Constants
+#define DEBUG_MODE 0
+
 /**
  * @brief Lists all available serial (COM) ports on the computer.
  * @param UINT8 len: scan from port 0 to port <len>
@@ -101,6 +104,14 @@ void sendSerialData(HANDLE hCom, const char *data)
     {
         printf("Error when receiving the data.\n");
     }
+    else
+    {
+        if (DEBUG_MODE)
+        {
+            printf("Data sent: %s", data);
+            printf("(%d Bytes)\n", strlen(data));
+        }
+    }
 }
 
 /**
@@ -118,6 +129,11 @@ char *receiveSerialData(HANDLE hCom)
     if (result && bytes_read > 0)
     {
         buf[bytes_read] = '\0'; // String Null-Terminierung
+        if (DEBUG_MODE)
+        {
+            printf("Data received: %s", buf);
+            printf("(%d Bytes)\n", strlen(buf));
+        }
     }
     else if (!result)
     {
@@ -144,6 +160,11 @@ char getInputChar()
     {
         printf(">Would you like to exit the program? (y/n): ");
         scanf("%c", &input);
+
+        if (DEBUG_MODE)
+        {
+            printf("User input: %d", input);
+        }
 
         if (input == 'y' || input == 'Y')
         {
@@ -258,6 +279,13 @@ int main()
 
         if (splitCalculationString(input_buf, &number_1, &number_2, &operator))
         {
+            if (DEBUG_MODE)
+            {
+                printf("Number 1: %d\n", number_1);
+                printf("Number 2: %d\n", number_2);
+                printf("Operator: %c\n", operator);
+            }
+
             /**
              * send string over serial interface. Syntax:
              * <number_1>;<number_2>;<calculation>;
@@ -273,11 +301,12 @@ int main()
             {
                 printf("Result: %s", returned_str);
             }
+            clearSerialBuffer();
         }
         else
         {
             printf("No valid operator found in the string.\n");
-            clearSerialBuffer(hCom);
+            clearSerialBuffer();
         }
 
         printf("--------------------------------\n");
