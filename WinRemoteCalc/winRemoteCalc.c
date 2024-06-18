@@ -1,4 +1,4 @@
-// import librarys
+// Import librarys
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,10 +6,7 @@
 
 /**
  * @brief Lists all available serial (COM) ports on the computer.
- *
- * This function prints all available serial ports of the computer.
- * @param
- * UINT8 len: scan from port 0 to port <len>
+ * @param UINT8 len: scan from port 0 to port <len>
  * @return void
  */
 void listSerialPorts(UINT8 len)
@@ -30,14 +27,13 @@ void listSerialPorts(UINT8 len)
 
 /**
  * @brief Opens serial port.
- *
  * This function opens a serial port with following input syntax: COM<0-255>
  * and sets port properties:
  * Baudrate: 115200 |
  * Byte size: 8 |
  * Stop bit: 1 |
  * Parity: no
- *
+ * @param const char *portName: complete name (e.g. COM3) of the serial interface
  * @return HANDLE (Windows API)
  */
 HANDLE openSerialPort(const char *portName)
@@ -105,20 +101,15 @@ void sendSerialData(HANDLE hCom, const char *data)
     {
         printf("Error when receiving the data.\n");
     }
-    else
-    {
-        printf("Data packet sent: %s", data);
-    }
 }
 
 /**
  * @brief Receives data via the given serial interface.
  * Prints message when read error from device occurs.
- * @param
- * hCom: serial interface
+ * @param hCom: serial interface
  * @return char* buf: pointer to string
  */
-char* receiveSerialData(HANDLE hCom)
+char *receiveSerialData(HANDLE hCom)
 {
     static char buf[100];
 
@@ -127,7 +118,6 @@ char* receiveSerialData(HANDLE hCom)
     if (result && bytes_read > 0)
     {
         buf[bytes_read] = '\0'; // String Null-Terminierung
-        // printf("Result: %s", buf);
     }
     else if (!result)
     {
@@ -148,8 +138,8 @@ char* receiveSerialData(HANDLE hCom)
  */
 char getInputChar()
 {
-    getchar();
-    static char input; // static: auch nach Funktionsaufruf noch verfügbar
+    // getchar();
+    static char input; // Static: still available after function call
     while (1)
     {
         printf(">Would you like to exit the program? (y/n): ");
@@ -171,38 +161,62 @@ char getInputChar()
     }
 }
 
-int split_string(const char *input_buf, int *number_1, int *number_2, char *operator) {
-    const char *operators_1 = "+-*/^";
-    const char *operators = "asmdp";
+/**
+ * @brief Receives data via the given serial interface.
+ * Prints message when read error from device occurs.
+ * @param hCom: serial interface
+ * @return char* buf: pointer to string
+ */
+int splitCalculationString(const char *input_buf, int *number_1, int *number_2, char *operator)
+{
+    const char *operators = "+-*/^";
+    const char *operators_arduino = "asmdp"; // Map to math operator defined in Arduino firmware
     const char *ptr = input_buf;
 
-    // Durchlaufe den String und finde den Operator
-    while (*ptr) {
-        const char *op_ptr = strchr(operators_1, *ptr);
-        if (op_ptr) {
-            int index = op_ptr - operators_1; // Index des Operators in operators_1
-            *operator = operators[index]; // Entsprechender Operator aus operators
+    // Run through the string and find the operator
+    while (*ptr)
+    {
+        const char *op_ptr = strchr(operators, *ptr); // Store
+        if (op_ptr)
+        {
+            int index = op_ptr - operators;      // Index of the operator in "operators"
+            *operator= operators_arduino[index]; // Corresponding operator from "operators_arduino"
             break;
         }
         ptr++;
     }
 
-    if (*operator == '\0') {
-        // Kein gültiger Operator gefunden
+    if (*operator== '\0')
+    {
+        // No valid operator found
         return 0;
     }
 
-    // Extrahiere die Zahlen vor und nach dem Operator
+    // Extract the numbers before and after the operator
     char left_part[100] = {0};
     char right_part[100] = {0};
-    strncpy(left_part, input_buf, ptr - input_buf);
+    strncpy(left_part, input_buf, (size_t)(ptr - input_buf));
     strcpy(right_part, ptr + 1);
 
-    // Entferne führende und nachfolgende Leerzeichen
+    // Remove leading and trailing spaces
     *number_1 = atoi(left_part);
     *number_2 = atoi(right_part);
 
     return 1;
+}
+
+/**
+ * @brief Clears serial buffer.
+ * Receives data from serial buffer until new line character.
+ * @return void
+ */
+void clearSerialBuffer()
+{
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF) // "EOF" is returned by getchar() -> avoids an infinite loop
+    {
+        continue;
+    }
 }
 
 /// @brief
@@ -219,9 +233,8 @@ int main()
 
     printf(">Select the serial port to be opened (enter the full name, e.g. COM3): ");
 
-    // get serial input
     char portName[7];
-    scanf("%6s", portName);
+    scanf("%6s", portName); // get serial input
 
     printf("Opening serial port: %s\n", portName);
     HANDLE hCom = openSerialPort(portName);
@@ -231,66 +244,40 @@ int main()
     }
 
     // stay in loop (recurring calculation)
-    while (1)
+    while (hCom != INVALID_HANDLE_VALUE)
     {
         printf("\n--- Remote Calculator ---\n");
-
-        // int x, y;
-        // char c;
-
-        // printf(">Enter first number (int): ");
-        // if (scanf("%d", &x) != 1)
-        // {
-        //     fprintf(stderr, "Invalid input.\n");
-        //     return 0;
-        // }
-
-        // printf(">Enter second number (int): ");
-        // if (scanf("%d", &y) != 1)
-        // {
-        //     fprintf(stderr, "Invalid input.\n");
-        //     return 0;
-        // }
-
-        // printf(">Enter operand: add (a)/ substract (s)/ multiply (m)/ divide (d)/ power (p): ");
-        // scanf(" %c", &c);
-
-        // ###################################################
 
         char input_buf[100];
 
         printf(">Enter calculation: ");
-        scanf(" %s", &input_buf);
+        scanf("%s", input_buf);
 
         int number_1, number_2;
         char operator= '\0';
 
-        if (split_string(input_buf, &number_1, &number_2, &operator))
+        if (splitCalculationString(input_buf, &number_1, &number_2, &operator))
         {
-            printf("Number 1: %d\n", number_1);
-            printf("Number 2: %d\n", number_2);
-            printf("Operator: %c\n", operator);
+            /**
+             * send string over serial interface. Syntax:
+             * <number_1>;<number_2>;<calculation>;
+             */
+            char data[100];
+            snprintf(data, sizeof(data), "%d;%d;%c;\n", number_1, number_2, operator);
+            sendSerialData(hCom, data);
+
+            printf("------------\n");
+
+            char *returned_str = receiveSerialData(hCom);
+            if (returned_str != NULL)
+            {
+                printf("Result: %s", returned_str);
+            }
         }
         else
         {
             printf("No valid operator found in the string.\n");
-        }
-
-        /**
-         * send string over serial interface. Syntax:
-         * <number_1>;<number_2>;<calculation>;
-         */
-        char data[100];
-        snprintf(data, sizeof(data), "%d;%d;%c;\n", number_1, number_2, operator);
-        //snprintf(data, sizeof(data), "%d;%d;%c;\n", x, y, c);
-        sendSerialData(hCom, data);
-
-        printf("------------\n");
-
-        char *returned_str = receiveSerialData(hCom);
-        if (returned_str != NULL)
-        {
-            printf("Result: %s", returned_str);
+            clearSerialBuffer(hCom);
         }
 
         printf("--------------------------------\n");
