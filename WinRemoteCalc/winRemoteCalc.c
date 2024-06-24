@@ -152,9 +152,8 @@ char *receiveSerialData(HANDLE hCom)
  * This function prompts the user to enter 'y' or 'n' to decide whether to exit the program.
  * @return char Returns 'y' if the user wants to exit, 'n' otherwise.
  */
-char getInputChar()
+char getUserInput()
 {
-    // getchar();
     static char input; // Static: still available after function call
     while (1)
     {
@@ -316,21 +315,14 @@ int main()
          * y: close serial port and close terminal
          * n: start new calculation
          */
-        while (1)
+        char response = getUserInput();
+        if (response == 'y')
         {
-            char response = getInputChar();
-            if (response == 'y')
-            {
-                CloseHandle(hCom);
-                printf("Serial port closed.\n");
-                printf("\n--- Program End ---\n");
-                Sleep(1000);
-                return 0;
-            }
-            else if (response == 'n')
-            {
-                break;
-            }
+            CloseHandle(hCom);
+            printf("Serial port closed.\n");
+            printf("\n--- Program End ---\n");
+            Sleep(1000);
+            return 0;
         }
     }
 }
