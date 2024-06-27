@@ -11,7 +11,9 @@ ArduinoSerialCalc: VSCode-Projekt für Arduino Firmware
 
 WinRemoteCalc: VSCode-Projekt für Kommunikation über serielle Schnittstelle (C-Programm, CLI)
 
--> Syntax Recheneingabe: <Zahl 1><Rechenoperator><Zahl 2>
+### Syntax Recheneingabe
+
+&lt;Zahl 1&gt;&lt;Rechenoperator&gt;&lt;Zahl 2&gt;
 
 ### Rechenoperatoren
 
