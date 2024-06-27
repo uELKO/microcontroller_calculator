@@ -10,3 +10,10 @@ Aufgabenstellung 2: Mikrocontroller-Implementierung eines einfachen Kalkulators
 ArduinoSerialCalc: VSCode-Projekt für Arduino Firmware
 
 WinRemoteCalc: VSCode-Projekt für Kommunikation über serielle Schnittstelle (C-Programm, CLI)
+-> Syntax Recheneingabe: <Zahl 1><Rechenoperator><Zahl 2>
+-> Rechenoperatoren
+    - Addition: +
+    - Subtraktion: -
+    - Multiplikation: *
+    - Division: /
+    - Potenz: ^
